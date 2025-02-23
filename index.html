@@ -87,16 +87,17 @@
       margin-bottom: 8px;
       border-radius: 5px;
       font-size: 0.95em;
-      color: #ffffff;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
     }
     .user {
       background: linear-gradient(90deg, #00b7ff, #007bff);
       text-align: right;
+      color: #ffffff;
     }
     .bot {
       background: linear-gradient(90deg, #B0C4DE, #87CEEB); /* Light blue-silver gradient */
       text-align: left;
+      color: #000000; /* Changed from white to black */
     }
     input, button {
       padding: 12px;
@@ -115,12 +116,12 @@
       color: #ffffff;
       border: 1px solid rgba(0, 255, 255, 0.5);
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
-      text-align: center; /* Center the input text */
+      text-align: center;
     }
     input::placeholder {
-      color: rgba(255, 255, 255, 0.5); /* Less visible placeholder */
+      color: rgba(255, 255, 255, 0.5);
       text-transform: uppercase;
-      text-align: center; /* Center the placeholder */
+      text-align: center;
     }
     button {
       background: linear-gradient(90deg, #00ffcc, #00b7ff);
@@ -229,7 +230,7 @@
 
     async function playResponse(text) {
       const video = document.getElementById("ugaVideo");
-      video.playbackRate = 1.5; // Speed up from 1.25 to 1.5
+      video.playbackRate = 1.5;
       video.currentTime = 0;
 
       const voices = await loadVoices();
@@ -241,16 +242,14 @@
       ) || voices[0];
       utterance.voice = selectedVoice;
       utterance.rate = 0.7;
-      utterance.pitch = 0.2; // Lower pitch from 0.4 to 0.2 for deeper voice
+      utterance.pitch = 0.2;
       utterance.volume = 1;
 
-      // Play video and voice together
       if (video.paused) {
         video.play().catch(error => console.error("Video playback failed:", error));
       }
       speechSynthesis.speak(utterance);
 
-      // Match video duration to voice length
       utterance.onend = () => {
         video.pause();
         video.currentTime = 0;
