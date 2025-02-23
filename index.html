@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GnOsIs aNsWeRs tHoSe wHo sEeK</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: url('/static/background.gif') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .wrapper {
+      width: 90%;
+      max-width: 700px;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+    #videoContainer {
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      border-radius: 50%;
+      overflow: hidden;
+      backdrop-filter: blur(5px);
+      padding: 10px;
+      box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.5), 0 0 25px rgba(0, 255, 255, 0.4);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #videoContainer video {
+      width: 100%;
+      height: auto;
+      border-radius: 50%;
+      filter: contrast(1.2) brightness(1.1);
+    }
+    #chatContainer {
+      width: 100%;
+      padding: 15px;
+      background: transparent;
+      flex-shrink: 0;
+      margin-top: 20px;
+    }
+    #chatContainer h2 {
+      margin: 0 0 15px;
+      font-size: 3.5em;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.9), 0 0 20px rgba(0, 255, 255, 0.7);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+      animation: blink 1.5s infinite;
+    }
+    #chatbox {
+      max-height: 120px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      background: rgba(0, 20, 40, 0.8);
+      border-radius: 5px;
+      padding: 10px;
+      box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.1);
+    }
+    .message {
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      font-size: 0.95em;
+      color: #ffffff; /* White for clarity */
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); /* Depth in the jungle */
+    }
+    .user {
+      background: linear-gradient(90deg, #00b7ff, #007bff);
+      text-align: right;
+    }
+    .bot {
+      background: linear-gradient(90deg, $00ffcc, #00b7ff);
+      text-align: left;
+    }
+    input, button {
+      padding: 12px;
+      font-size: 1em;
+      width: 90%;
+      border: none;
+      outline: none;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      display: block;
+      margin: 0 auto;
+      transition: all 0.3s ease;
+    }
+    input {
+      background: rgba(0, 20, 40, 0.8);
+      color: #ffffff;
+      border: 1px solid rgba(0, 255, 255, 0.5);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+    }
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+    }
+    button {
+      background: linear-gradient(90deg, #00ffcc, #00b7ff);
+      color: #000;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    }
+    button:hover {
+      background: linear-gradient(90deg, #00b7ff, #007bff);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.6); }
+      100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
+    }
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    #videoContainer, button {
+      animation: pulse 3s infinite ease-in-out;
+    }
+    /* Responsive Jungle */
+    @media (max-width: 500px) {
+      .wrapper {
+        width: 95%;
+        padding: 10px;
+      }
+      #videoContainer {
+        max-width: 300px;
+      }
+      #chatContainer h2 {
+        font-size: 2.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div id="videoContainer">
+      <video id="ugaVideo" loop muted>
+        <source src="/static/348910056580788233.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+    <div id="chatContainer">
+      <h2>GNOSIS-AI</h2>
+      <div id="chatbox"></div>
+      <input id="userInput" type="text" placeholder="bReAk tHe SimUlaCrUm , AsK yOuR qUeStIOn">
+      <button id="sendButton">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const inputField = document.getElementById("userInput");
+    const sendButton = document.getElementById("sendButton");
+    
+    sendButton.addEventListener("click", sendMessage);
+    inputField.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
+    
+    async function sendMessage() {
+      const userText = inputField.value.trim();
+      if (!userText) return;
+      
+      const chatbox = document.getElementById("chatbox");
+      chatbox.innerHTML = "";
+      chatbox.innerHTML += `<div class="message user">You: ${userText}</div>`;
+      inputField.value = "";
+      
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userText })
+        });
+        
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        chatbox.innerHTML += `<div class="message bot">UgaBuga: ${data.reply}</div>`;
+        chatbox.scrollTop = chatbox.scrollHeight;
+        
+        playResponse(data.reply);
+      } catch (error) {
+        console.error('Chatbot response error:', error);
+        chatbox.innerHTML += `<div class="message bot">UgaBuga Error: ${error.message}</div>`;
+      }
+    }
+    
+    function loadVoices() {
+      return new Promise(resolve => {
+        const voices = speechSynthesis.getVoices();
+        if (voices.length) return resolve(voices);
+        speechSynthesis.onvoiceschanged = () => resolve(speechSynthesis.getVoices());
+      });
+    }
+
+    async function playResponse(text) {
+      const video = document.getElementById("ugaVideo");
+      video.playbackRate = 1.25;
+      video.currentTime = 0;
+      if (video.paused) {
+        video.play().catch(error => console.error("Video playback failed:", error));
+      }
+
+      const voices = await loadVoices();
+      const utterance = new SpeechSynthesisUtterance(text);
+      let selectedVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes("male") || 
+        voice.name.toLowerCase().includes("david") || 
+        voice.name.toLowerCase().includes("daniel")
+      ) || voices[0];
+      utterance.voice = selectedVoice;
+      utterance.rate = 0.7;
+      utterance.pitch = 0.4;
+      utterance.volume = 1;
+
+      utterance.onend = () => {
+        video.pause();
+        video.currentTime = 0; // Reset for the next seeker
+      };
+
+      speechSynthesis.speak(utterance);
+    }
+  </script>
+</body>
+</html>
