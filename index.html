@@ -11,7 +11,7 @@
       height: 100%;
       overflow: hidden;
       font-family: 'Courier New', monospace;
-      display: flex; /* Keep flex on body for centering */
+      display: flex;
       justify-content: center;
       align-items: center;
     }
@@ -22,7 +22,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      z-index: -1; /* Behind everything */
+      z-index: -1;
     }
     .wrapper {
       width: 90%;
@@ -30,11 +30,11 @@
       height: 90vh;
       display: flex;
       flex-direction: column;
-      justify-content: space-between; /* Space out video and chat */
+      justify-content: space-between;
       align-items: center;
       padding: 20px;
-      position: relative; /* Relative to stay within centered body */
-      z-index: 1; /* Above background video */
+      position: relative;
+      z-index: 1;
     }
     #videoContainer {
       width: 100%;
@@ -95,7 +95,7 @@
       text-align: right;
     }
     .bot {
-      background: linear-gradient(90deg, #00ffcc, #00b7ff);
+      background: linear-gradient(90deg, #B0C4DE, #87CEEB); /* Light blue-silver gradient */
       text-align: left;
     }
     input, button {
@@ -115,10 +115,12 @@
       color: #ffffff;
       border: 1px solid rgba(0, 255, 255, 0.5);
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+      text-align: center; /* Center the input text */
     }
     input::placeholder {
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(255, 255, 255, 0.5); /* Less visible placeholder */
       text-transform: uppercase;
+      text-align: center; /* Center the placeholder */
     }
     button {
       background: linear-gradient(90deg, #00ffcc, #00b7ff);
@@ -174,7 +176,7 @@
     <div id="chatContainer">
       <h2>GNOSIS-AI</h2>
       <div id="chatbox"></div>
-      <input id="userInput" type="text" placeholder="bReAk tHe SimUlaCrUm , AsK yOuR qUeStIOn">
+      <input id="userInput" type="text" placeholder="BrEaK ThE SiMuLaCrUm, AsK yOuR qUeStIoN">
       <button id="sendButton">Send</button>
     </div>
   </div>
@@ -207,13 +209,13 @@
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
         const data = await response.json();
-        chatbox.innerHTML += `<div class="message bot">UgaBuga: ${data.reply}</div>`;
+        chatbox.innerHTML += `<div class="message bot">GnOsIs: ${data.reply}</div>`;
         chatbox.scrollTop = chatbox.scrollHeight;
         
         playResponse(data.reply);
       } catch (error) {
         console.error('Chatbot response error:', error);
-        chatbox.innerHTML += `<div class="message bot">UgaBuga Error: ${error.message}</div>`;
+        chatbox.innerHTML += `<div class="message bot">GnOsIs Error: ${error.message}</div>`;
       }
     }
     
@@ -227,11 +229,8 @@
 
     async function playResponse(text) {
       const video = document.getElementById("ugaVideo");
-      video.playbackRate = 1.25;
+      video.playbackRate = 1.5; // Speed up from 1.25 to 1.5
       video.currentTime = 0;
-      if (video.paused) {
-        video.play().catch(error => console.error("Video playback failed:", error));
-      }
 
       const voices = await loadVoices();
       const utterance = new SpeechSynthesisUtterance(text);
@@ -242,15 +241,20 @@
       ) || voices[0];
       utterance.voice = selectedVoice;
       utterance.rate = 0.7;
-      utterance.pitch = 0.4;
+      utterance.pitch = 0.2; // Lower pitch from 0.4 to 0.2 for deeper voice
       utterance.volume = 1;
 
+      // Play video and voice together
+      if (video.paused) {
+        video.play().catch(error => console.error("Video playback failed:", error));
+      }
+      speechSynthesis.speak(utterance);
+
+      // Match video duration to voice length
       utterance.onend = () => {
         video.pause();
         video.currentTime = 0;
       };
-
-      speechSynthesis.speak(utterance);
     }
   </script>
 </body>
