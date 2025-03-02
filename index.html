@@ -213,47 +213,73 @@
         chatbox.innerHTML += `<div class="message bot">GnOsIs: ${data.reply}</div>`;
         chatbox.scrollTop = chatbox.scrollHeight;
         
-        playResponse(data.reply);
+        playWiseElderVoice(data.reply);
       } catch (error) {
         console.error('Chatbot response error:', error);
-        chatbox.innerHTML += `<div class="message bot">GnOsIs Error: ${error.message}</div>`;
+        chatbox.innerHTML += `<div class="message bot">GnOsIs ErRoR: ${error.message}</div>`;
       }
     }
-    
-    function loadVoices() {
-      return new Promise(resolve => {
-        const voices = speechSynthesis.getVoices();
-        if (voices.length) return resolve(voices);
-        speechSynthesis.onvoiceschanged = () => resolve(speechSynthesis.getVoices());
-      });
-    }
 
-    async function playResponse(text) {
+    async function playWiseElderVoice(text) {
       const video = document.getElementById("ugaVideo");
       video.playbackRate = 1.5;
       video.currentTime = 0;
 
-      const voices = await loadVoices();
-      const utterance = new SpeechSynthesisUtterance(text);
-      let selectedVoice = voices.find(voice => 
-        voice.name.toLowerCase().includes("male") || 
-        voice.name.toLowerCase().includes("david") || 
-        voice.name.toLowerCase().includes("daniel")
-      ) || voices[0];
-      utterance.voice = selectedVoice;
-      utterance.rate = 0.7;
-      utterance.pitch = 0.2;
-      utterance.volume = 1;
+      // Modify text for TTS pronunciation
+      let ttsText = text
+        .replace(/\$/g, " ")           // Silence "$" by replacing with space
+        .replace(/\$UGA/g, "youga")    // "$UGA" to "youga"
+        .replace(/UGA/g, "youga");     // "UGA" to "youga"
 
-      if (video.paused) {
-        video.play().catch(error => console.error("Video playback failed:", error));
-      }
-      speechSynthesis.speak(utterance);
-
-      utterance.onend = () => {
-        video.pause();
-        video.currentTime = 0;
+      const apiKey = "AIzaSyChFaSPFqvfvZDpuhDai9L-tSBcXBEm4DM"; // Replace with your actual Google Cloud TTS API key
+      const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
+      const body = {
+        input: { text: ttsText },
+        voice: { languageCode: "en-GB", name: "en-GB-Wavenet-D" }, // WaveNet British elder
+        audioConfig: { 
+          audioEncoding: "MP3", 
+          pitch: -15,      // Deep rumble
+          speakingRate: 1.2 // Sped up a bit more—swift wisdom
+        }
       };
+
+      try {
+        console.log("Fetching TTS audio for:", ttsText);
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("TTS fetch failed with status:", response.status, "Response:", errorText);
+          throw new Error(`TTS API failed: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log("TTS response:", data);
+        if (!data.audioContent) {
+          console.error("No audioContent in TTS response");
+          throw new Error("No audio content returned");
+        }
+
+        const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+        if (video.paused) {
+          video.play().catch(error => console.error("Video playback failed:", error));
+        }
+        audio.play();
+        console.log("Audio playing");
+
+        audio.onended = () => {
+          video.pause();
+          video.currentTime = 0;
+          console.log("Audio and video stopped");
+        };
+      } catch (error) {
+        console.error("TTS error:", error);
+        chatbox.innerHTML += `<div class="message bot">VoIcE oF tHe JuNgLe FaIlS: ${error.message}</div>`;
+      }
     }
   </script>
 </body>
