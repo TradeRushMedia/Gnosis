@@ -14,7 +14,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #001428; /* Fallback for older browsers */
     }
     #backgroundVideo {
       position: fixed;
@@ -24,15 +23,15 @@
       height: 100%;
       object-fit: cover;
       z-index: -1;
-      filter: brightness(0.8);
     }
     .wrapper {
       width: 90%;
-      max-width: 800px; /* Slightly wider for long responses */
+      max-width: 700px;
       height: 90vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      align-items: center;
       padding: 20px;
       position: relative;
       z-index: 1;
@@ -75,23 +74,20 @@
       animation: blink 1.5s infinite;
     }
     #chatbox {
-      max-height: 300px; /* Increased for longer responses */
+      max-height: 120px;
       overflow-y: auto;
       margin-bottom: 15px;
-      background: rgba(0, 20, 40, 0.85);
+      background: rgba(0, 20, 40, 0.8);
       border-radius: 5px;
-      padding: 15px;
-      box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2);
-      font-size: 1em;
-      line-height: 1.5; /* Improved readability */
-      color: #e0f7ff; /* Softer cyan for contrast */
+      padding: 10px;
+      box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.1);
     }
     .message {
-      padding: 10px;
-      margin-bottom: 10px;
+      padding: 8px;
+      margin-bottom: 8px;
       border-radius: 5px;
+      font-size: 0.95em;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-      word-wrap: break-word;
     }
     .user {
       background: linear-gradient(90deg, #00b7ff, #007bff);
@@ -101,12 +97,7 @@
     .bot {
       background: linear-gradient(90deg, #B0C4DE, #87CEEB); /* Light blue-silver gradient */
       text-align: left;
-      color: #000000; /* Black for readability */
-    }
-    .controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
+      color: #000000; /* Changed from white to black */
     }
     input, button {
       padding: 12px;
@@ -116,6 +107,8 @@
       outline: none;
       border-radius: 5px;
       margin-bottom: 10px;
+      display: block;
+      margin: 0 auto;
       transition: all 0.3s ease;
     }
     input {
@@ -128,6 +121,7 @@
     input::placeholder {
       color: rgba(255, 255, 255, 0.5);
       text-transform: uppercase;
+      text-align: center;
     }
     button {
       background: linear-gradient(90deg, #00ffcc, #00b7ff);
@@ -136,8 +130,6 @@
       font-weight: bold;
       text-transform: uppercase;
       box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-      width: auto;
-      padding: 12px 20px;
     }
     button:hover {
       background: linear-gradient(90deg, #00b7ff, #007bff);
@@ -156,17 +148,6 @@
     #videoContainer, button {
       animation: pulse 3s infinite ease-in-out;
     }
-    /* Scrollbar styling for chatbox */
-    #chatbox::-webkit-scrollbar {
-      width: 8px;
-    }
-    #chatbox::-webkit-scrollbar-thumb {
-      background: rgba(0, 255, 255, 0.5);
-      border-radius: 4px;
-    }
-    #chatbox::-webkit-scrollbar-track {
-      background: rgba(0, 20, 40, 0.5);
-    }
     @media (max-width: 500px) {
       .wrapper {
         width: 95%;
@@ -177,16 +158,6 @@
       }
       #chatContainer h2 {
         font-size: 2.5em;
-      }
-      #chatbox {
-        max-height: 200px; /* Adjusted for smaller screens */
-      }
-      .controls {
-        flex-direction: column;
-        align-items: center;
-      }
-      button {
-        width: 100%;
       }
     }
   </style>
@@ -207,81 +178,64 @@
       <h2>GNOSIS-AI</h2>
       <div id="chatbox"></div>
       <input id="userInput" type="text" placeholder="BrEaK ThE SiMuLaCrUm, AsK yOuR qUeStIoN">
-      <div class="controls">
-        <button id="sendButton">SeNd</button>
-        <button id="clearButton">ClEaR</button>
-      </div>
+      <button id="sendButton">Send</button>
     </div>
   </div>
 
   <script>
     const inputField = document.getElementById("userInput");
     const sendButton = document.getElementById("sendButton");
-    const clearButton = document.getElementById("clearButton");
-    const chatbox = document.getElementById("chatbox");
-    const ugaVideo = document.getElementById("ugaVideo");
-
+    
     sendButton.addEventListener("click", sendMessage);
     inputField.addEventListener("keydown", function(e) {
       if (e.key === "Enter") sendMessage();
     });
-    clearButton.addEventListener("click", clearChat);
-
+    
     async function sendMessage() {
       const userText = inputField.value.trim();
       if (!userText) return;
-
-      appendMessage("user", `YoU: ${userText}`);
+      
+      const chatbox = document.getElementById("chatbox");
+      chatbox.innerHTML = "";
+      chatbox.innerHTML += `<div class="message user">You: ${userText}</div>`;
       inputField.value = "";
-
+      
       try {
         const response = await fetch("https://b3e9-2600-6c48-6e7f-7efb-cc34-65bc-e53-2d96.ngrok-free.app/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: userText })
         });
-
+        
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
+        
         const data = await response.json();
-        appendMessage("bot", `ElDeR uGa: ${data.reply}`);
+        chatbox.innerHTML += `<div class="message bot">GnOsIs: ${data.reply}</div>`;
+        chatbox.scrollTop = chatbox.scrollHeight;
+        
         playResponse(data.reply);
       } catch (error) {
         console.error('Chatbot response error:', error);
-        appendMessage("bot", `GnOsIs ErRoR: ${error.message}`);
+        chatbox.innerHTML += `<div class="message bot">GnOsIs Error: ${error.message}</div>`;
       }
     }
-
-    function appendMessage(type, text) {
-      const messageDiv = document.createElement("div");
-      messageDiv.className = `message ${type}`;
-      messageDiv.textContent = text;
-      chatbox.appendChild(messageDiv);
-      chatbox.scrollTop = chatbox.scrollHeight; // Auto-scroll to bottom
-    }
-
-    function clearChat() {
-      chatbox.innerHTML = "";
-      ugaVideo.pause();
-      ugaVideo.currentTime = 0;
-      speechSynthesis.cancel(); // Stop any ongoing speech
-    }
-
-    async function loadVoices() {
+    
+    function loadVoices() {
       return new Promise(resolve => {
-        let voices = speechSynthesis.getVoices();
+        const voices = speechSynthesis.getVoices();
         if (voices.length) return resolve(voices);
         speechSynthesis.onvoiceschanged = () => resolve(speechSynthesis.getVoices());
       });
     }
 
     async function playResponse(text) {
-      ugaVideo.playbackRate = 1.5;
-      ugaVideo.currentTime = 0;
+      const video = document.getElementById("ugaVideo");
+      video.playbackRate = 1.5;
+      video.currentTime = 0;
 
       const voices = await loadVoices();
       const utterance = new SpeechSynthesisUtterance(text);
-      const selectedVoice = voices.find(voice => 
+      let selectedVoice = voices.find(voice => 
         voice.name.toLowerCase().includes("male") || 
         voice.name.toLowerCase().includes("david") || 
         voice.name.toLowerCase().includes("daniel")
@@ -291,14 +245,14 @@
       utterance.pitch = 0.2;
       utterance.volume = 1;
 
-      if (ugaVideo.paused) {
-        ugaVideo.play().catch(error => console.error("Video playback failed:", error));
+      if (video.paused) {
+        video.play().catch(error => console.error("Video playback failed:", error));
       }
       speechSynthesis.speak(utterance);
 
       utterance.onend = () => {
-        ugaVideo.pause();
-        ugaVideo.currentTime = 0;
+        video.pause();
+        video.currentTime = 0;
       };
     }
   </script>
